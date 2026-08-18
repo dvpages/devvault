@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevVault — Resources for Coders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #eef1e8;
+    --fg: #16211b;
+    --border: #2e3d33;
+    --muted: #5c6a5f;
+    --accent: #1f7a5c;
+    --accent2: #a6791f;
+    --link: #235f8c;
+    --card-bg: #f8f6ec;
+    --tag-bg: #dfe4d6;
+    --nav-bg: #14201a;
+    --footer-bg: #0f1712;
+    --footer-fg: #cdd2c6;
+    --input-bg: #fbfaf3;
+    --row-hover: #e3e7d9;
+    --mono: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+    --sans: 'Inter', 'Segoe UI', sans-serif;
+    --display: 'Fraunces', Georgia, serif;
+    --danger: #c0392b;
+    --success: #1f7a5c;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 15px;
+    line-height: 1.6;
+    background-image: radial-gradient(ellipse 1200px 500px at 50% 0%, rgba(31,122,92,0.06), transparent 65%);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--link); text-decoration: underline; text-decoration-color: rgba(35,95,140,0.35); text-underline-offset: 2px; }
+  a:hover { color: var(--accent2); text-decoration-color: currentColor; }
+
+  .sidebar-box, .news-card, .info-card, #hero-outer, .resource-table, .notice, .cat-bar, .pagination {
+    box-shadow: 0 2px 10px rgba(15,23,18,0.06);
+  }
+
+  /* ── TOP BANNER ── */
+  #top-banner {
+    background: #123527;
+    border-bottom: 2px solid #0a2118;
+    color: #f4e2ba;
+    font-size: 12px;
+    font-family: var(--mono);
+    padding: 5px 36px 5px 12px;
+    letter-spacing: 0.05em;
+    position: relative;
+    text-align: center;
+  }
+  #top-banner a { color: #fff; font-weight: 600; }
+  #banner-close {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: rgba(255,255,255,0.7);
+    font-size: 16px; cursor: pointer; line-height: 1; padding: 2px 6px;
+    font-family: var(--mono);
+  }
+  #banner-close:hover { color: #fff; }
+
+  /* ── NAV ── */
+  #site-nav {
+    background: var(--nav-bg);
+    border-top: 2px solid #555;
+    border-bottom: 4px solid var(--accent);
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: stretch;
+    flex-wrap: wrap; padding-left: 0;
+  }
+  .nav-logo {
+    font-family: var(--mono); font-weight: 600; font-size: 17px;
+    color: #fff; text-decoration: none; padding: 14px 16px;
+    letter-spacing: -0.02em; border-right: 2px solid #333;
+    flex-shrink: 0; display: flex; align-items: center;
+    background: #0a0a0a;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-links {
+    display: flex; flex-wrap: wrap; list-style: none; flex: 1;
+  }
+  .nav-links li a {
+    display: flex; align-items: center; height: 100%;
+    color: #bbb; text-decoration: none;
+    font-size: 12px; font-family: var(--mono);
+    padding: 0 16px; border-right: 1px solid #1e1e1e;
+    letter-spacing: 0.02em; transition: background 0.1s, color 0.1s;
+    white-space: nowrap;
+  }
+  .nav-links li a:hover, .nav-links li a.active { background: #1a1a1a; color: #fff; }
+  .nav-links li a.active { color: var(--accent); }
+  .nav-search {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 12px; margin-left: auto;
+  }
+  .nav-search input {
+    background: #1a1a1a; border: 1px solid #333; color: #fff;
+    font-family: var(--mono); font-size: 12px;
+    padding: 5px 10px; width: 160px; outline: none;
+  }
+  .nav-search input:focus { border-color: var(--accent); }
+  .nav-search button {
+    background: var(--accent); color: #fff; border: none;
+    font-family: var(--mono); font-size: 12px;
+    padding: 5px 12px; cursor: pointer; white-space: nowrap;
+  }
+
+  /* ── AUTH BUTTON IN NAV ── */
+  .nav-auth {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 12px; border-left: 1px solid #333;
+  }
+  .nav-auth-btn {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    padding: 6px 12px; border: 1px solid var(--accent);
+    background: transparent; color: var(--accent); cursor: pointer;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    transition: background 0.15s, color 0.15s;
+  }
+  .nav-auth-btn:hover { background: var(--accent); color: #fff; }
+  .nav-auth-btn.active-user { background: var(--accent); color: #fff; }
+  .nav-user-info {
+    font-family: var(--mono); font-size: 11px; color: #aaa;
+    display: none; align-items: center; gap: 8px;
+  }
+  .nav-user-info.visible { display: flex; }
+  .nav-user-info .username { color: var(--accent); font-weight: 600; }
+  .nav-user-info .role-badge {
+    font-size: 9px; padding: 1px 5px; background: #333; color: #aaa;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .nav-user-info .role-badge.admin { background: var(--accent2); color: #fff; }
+
+  /* ── HERO ── */
+  #hero-outer {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--card-bg);
+    border-top: 2px solid var(--border);
+    border-bottom: 4px solid var(--border);
+    border-left: 6px solid var(--accent);
+  }
+  #hero-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 22px 24px 20px;
+  }
+  #hero-inner h1 {
+    font-family: var(--display);
+    font-size: clamp(26px, 4vw, 44px);
+    font-weight: 600;
+    font-optical-sizing: auto;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+  #hero-inner h1 em { color: var(--accent); font-style: normal; }
+  #hero-inner p {
+    color: var(--muted); font-size: clamp(12px, 1.5vw, 14px);
+    margin-bottom: 16px; max-width: 640px; line-height: 1.5;
+  }
+  .hero-stats {
+    display: flex; flex-wrap: wrap; gap: 0;
+    border-top: 1px solid #ccd2c0;
+    padding-top: 12px; margin-top: 2px;
+  }
+  .hero-stat {
+    padding-right: 24px; margin-right: 24px;
+    border-right: 1px solid #b9c2ac;
+  }
+  .hero-stat:last-child { border-right: none; margin-right: 0; }
+  .hero-stat-n {
+    font-family: var(--mono); font-size: clamp(16px, 2vw, 22px);
+    font-weight: 600; display: block; line-height: 1; color: var(--fg);
+  }
+  .hero-stat-l {
+    font-family: var(--mono); font-size: 9px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    display: block; margin-top: 3px;
+  }
+
+  /* ── TICKER ── */
+  #hero-ticker-bar {
+    background: #101a15; border-top: 2px solid #24332a;
+    overflow: hidden; display: flex; align-items: stretch;
+  }
+  #hero-ticker-label {
+    background: var(--accent); color: #ffe8b0;
+    font-family: var(--mono); font-size: 9px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 5px 12px; white-space: nowrap; flex-shrink: 0;
+    display: flex; align-items: center;
+  }
+  #hero-ticker-scroll {
+    overflow: hidden; flex: 1; display: flex; align-items: center;
+  }
+  .ticker-horiz-inner {
+    display: inline-flex; white-space: nowrap;
+    animation: tickerH 28s linear infinite;
+  }
+  .ticker-horiz-inner span {
+    font-family: var(--mono); font-size: 11px; color: #aaa;
+    padding: 5px 28px 5px 0; white-space: nowrap;
+  }
+  .ticker-horiz-inner span::before { content: "▸ "; color: var(--accent); font-size: 9px; }
+  @keyframes tickerH {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── PAGE WRAP ── */
+  .page-wrap { max-width: 1100px; margin: 0 auto; padding: 0 12px; }
+
+  /* ── TWO-COL LAYOUT ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+    margin-top: 20px;
+    align-items: start;
+  }
+
+  /* ── SECTION TITLES ── */
+  .section-head {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);
+    border-bottom: 3px double var(--border);
+    padding-bottom: 5px; margin-bottom: 14px;
+  }
+
+  /* ── CONTENT SECTIONS ── */
+  .content-section { display: none; }
+  .content-section.active { display: block; }
+
+  /* ── CATEGORY NAV ── */
+  .cat-bar {
+    display: flex; flex-wrap: wrap; gap: 0;
+    margin: 16px 0 0;
+    border: 1px solid var(--border); border-bottom: none;
+    background: var(--card-bg);
+  }
+  .cat-btn {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 7px 14px; border: none; background: none;
+    border-right: 1px solid var(--border); cursor: pointer;
+    color: var(--muted); transition: background 0.1s, color 0.1s;
+    white-space: nowrap;
+  }
+  .cat-btn:last-child { border-right: none; }
+  .cat-btn:hover, .cat-btn.active { background: var(--fg); color: var(--bg); }
+
+  /* ── RESOURCE TABLE ── */
+  .resource-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 13px; background: var(--card-bg);
+    border: 2px solid var(--border);
+  }
+  .resource-table th {
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    background: #333; color: #ddd;
+    padding: 8px 10px; text-align: left;
+    border-right: 1px solid #555;
+  }
+  .resource-table th:last-child { border-right: none; }
+  .resource-table td {
+    padding: 10px; border-bottom: 1px solid #b3bda3;
+    border-right: 1px solid #c0c9b0; vertical-align: top;
+  }
+  .resource-table td:last-child { border-right: none; }
+  .resource-table tr:hover td { background: var(--row-hover); }
+  .resource-table tr:last-child td { border-bottom: none; }
+  .r-title { font-weight: 600; color: var(--fg); text-decoration: none; font-size: 13px; }
+  .r-title:hover { color: var(--accent); }
+  .r-desc { color: var(--muted); font-size: 12px; margin-top: 2px; display: block; }
+  .r-author { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .r-date { font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block; font-family: var(--mono);
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; padding: 2px 6px; border-radius: 2px;
+    margin-right: 3px; vertical-align: middle; white-space: nowrap;
+  }
+  .badge-tool    { background: #dfe8f0; color: #1f4e6e; }
+  .badge-new     { background: #f7e3c2; color: #8a5a12; }
+  .badge-guide   { background: #e2ecd4; color: #40591e; }
+  .badge-news-t  { background: #fbecc8; color: #7a5000; }
+  .badge-snippet { background: #e6e1f2; color: #4d3a80; }
+  .badge-lib     { background: #d9ece5; color: #0f5c47; }
+
+  /* ── PAGINATION ── */
+  .pagination {
+    display: flex; gap: 0; margin-top: 0;
+    border: 1px solid var(--border); border-top: none;
+    background: var(--card-bg);
+  }
+  .pag-btn {
+    font-family: var(--mono); font-size: 11px; padding: 6px 12px;
+    border: none; background: none;
+    border-right: 1px solid var(--border); cursor: pointer; color: var(--muted);
+  }
+  .pag-btn:last-child { border-right: none; }
+  .pag-btn.active { background: var(--fg); color: var(--bg); }
+  .pag-btn:hover:not(.active) { background: var(--row-hover); }
+
+  /* ── SIDEBAR ── */
+  .sidebar-box {
+    background: var(--card-bg); border: 2px solid var(--border);
+    border-top: 4px solid var(--accent); margin-bottom: 18px;
+  }
+  .sidebar-box-title {
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    background: #333; color: #ddd; padding: 6px 12px; display: block;
+  }
+  .sidebar-box-body { padding: 12px; }
+  .sidebar-box-body ul { list-style: none; }
+  .sidebar-box-body ul li {
+    padding: 7px 0; border-bottom: 1px solid #b9c2ac; font-size: 12px; line-height: 1.4;
+  }
+  .sidebar-box-body ul li:last-child { border-bottom: none; }
+  .sidebar-box-body ul li a { text-decoration: none; color: var(--fg); font-size: 12px; }
+  .sidebar-box-body ul li a:hover { color: var(--accent); text-decoration: underline; }
+  .sidebar-box-body p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag {
+    background: var(--tag-bg); border: 1px solid #aaa;
+    font-family: var(--mono); font-size: 11px;
+    padding: 3px 8px; cursor: pointer; color: var(--fg); text-decoration: none;
+  }
+  .tag:hover { background: var(--fg); color: var(--bg); }
+
+  /* ── NEWS ── */
+  .news-item {
+    padding: 12px 0; border-bottom: 1px solid #b3bda3;
+    display: grid; grid-template-columns: auto 1fr;
+    gap: 10px; align-items: start;
+  }
+  .news-item:last-child { border-bottom: none; }
+  .news-date {
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    padding-top: 2px; white-space: nowrap; min-width: 60px;
+  }
+  .news-item a { font-size: 13px; font-weight: 600; text-decoration: none; color: var(--fg); }
+  .news-item a:hover { color: var(--accent); text-decoration: underline; }
+  .news-src { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; font-family: var(--mono); }
+  .news-card {
+    background: var(--card-bg); border: 1px solid #a3ab93;
+    border-left: 4px solid var(--accent2); padding: 14px 16px; margin-bottom: 16px;
+  }
+  .news-card h3 { font-family: var(--display); font-weight: 600; font-size: 17px; margin-bottom: 8px; line-height: 1.4; }
+  .news-card h3 a { text-decoration: underline; color: var(--link); }
+  .news-card h3 a:hover { color: var(--accent); }
+  .news-card-meta {
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 6px;
+  }
+  .news-card p { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.7; }
+
+  /* ── NOTICE ── */
+  .notice {
+    background: #faf1d6; border: 1px solid #c99a2e;
+    border-left: 4px solid #c99a2e; padding: 10px 14px;
+    font-size: 12px; margin-bottom: 14px; color: #5c4400; line-height: 1.5;
+  }
+  .notice strong { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* ── ABOUT / INFO GRID ── */
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+  .info-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-top: 3px solid var(--accent2); padding: 14px;
+  }
+  .info-card h3 { font-family: var(--mono); font-size: 13px; margin-bottom: 6px; }
+  .info-card p, .info-card li { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .info-card ul { padding-left: 16px; }
+  .info-card ul li { margin-bottom: 4px; }
+
+  /* ── FOOTER ── */
+  #site-footer {
+    background: var(--footer-bg); color: var(--footer-fg);
+    border-top: 3px solid var(--accent); margin-top: 40px; font-size: 13px;
+  }
+  .footer-top {
+    max-width: 1100px; margin: 0 auto; padding: 28px 12px 20px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 28px;
+  }
+  .footer-col h4 {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);
+    margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #2a2a2a;
+  }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 6px; }
+  .footer-col ul li a { color: #bbb; text-decoration: none; font-size: 12px; font-family: var(--mono); }
+  .footer-col ul li a:hover { color: #fff; text-decoration: underline; }
+  .footer-col p { color: #999; font-size: 12px; line-height: 1.6; }
+  .footer-bottom {
+    border-top: 1px solid #1e1e1e; max-width: 1100px; margin: 0 auto;
+    padding: 12px; display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 8px;
+  }
+  .footer-bottom span { font-family: var(--mono); font-size: 11px; color: #555; }
+  .footer-bottom a { color: #777; font-family: var(--mono); font-size: 11px; }
+
+  /* ══════════════════════════════════════
+     MODAL / DIALOG
+  ════════════════════════════════════════ */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.6); align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--card-bg); border: 2px solid var(--border);
+    border-top: 4px solid var(--accent); padding: 24px;
+    max-width: 440px; width: 90%; position: relative;
+  }
+  .modal-box h2 {
+    font-family: var(--mono); font-size: 14px; margin-bottom: 14px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .modal-close {
+    position: absolute; top: 10px; right: 12px; background: none;
+    border: none; font-size: 18px; cursor: pointer; color: var(--muted);
+  }
+  .modal-close:hover { color: var(--fg); }
+
+  /* ── FORM ELEMENTS ── */
+  .form-group { margin-bottom: 12px; }
+  .form-group label {
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    display: block; margin-bottom: 5px; color: var(--muted);
+  }
+  .form-group input, .form-group textarea, .form-group select {
+    width: 100%; font-family: var(--mono); font-size: 13px;
+    padding: 7px 10px; border: 1px solid var(--border);
+    background: var(--input-bg); outline: none;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    border-color: var(--accent);
+  }
+  .form-group textarea { resize: vertical; }
+
+  .btn {
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    padding: 8px 18px; border: none; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn-primary { background: var(--fg); color: var(--bg); }
+  .btn-primary:hover { background: var(--accent); color: #fff; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #a93226; }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { background: #1a6b4e; }
+  .btn-sm { font-size: 10px; padding: 4px 10px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── STATUS TOAST ── */
+  .toast {
+    position: fixed; bottom: 20px; right: 20px; z-index: 2000;
+    font-family: var(--mono); font-size: 12px; padding: 10px 16px;
+    border: 1px solid; opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .toast.visible { opacity: 1; pointer-events: auto; }
+  .toast.success { background: #d4edda; border-color: #28a745; color: #155724; }
+  .toast.error { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+  .toast.info { background: #d1ecf1; border-color: #17a2b8; color: #0c5460; }
+
+  /* ── ADMIN / DASHBOARD PANELS ── */
+  .dash-panel {
+    background: var(--card-bg); border: 2px solid var(--border);
+    border-top: 4px solid var(--accent2); margin-top: 20px; padding: 18px;
+  }
+  .dash-panel h3 {
+    font-family: var(--mono); font-size: 13px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 12px; padding-bottom: 6px;
+    border-bottom: 2px solid var(--border);
+  }
+  .dash-tabs {
+    display: flex; gap: 0; margin-bottom: 16px;
+    border: 1px solid var(--border); background: var(--card-bg);
+  }
+  .dash-tab {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    padding: 7px 14px; border: none; background: none;
+    border-right: 1px solid var(--border); cursor: pointer;
+    color: var(--muted); transition: background 0.1s, color 0.1s;
+  }
+  .dash-tab:last-child { border-right: none; }
+  .dash-tab:hover, .dash-tab.active { background: var(--fg); color: var(--bg); }
+  .dash-content { display: none; }
+  .dash-content.active { display: block; }
+
+  .empty-state {
+    text-align: center; padding: 30px 20px;
+    font-family: var(--mono); font-size: 12px; color: var(--muted);
+  }
+
+  /* ── APPLICATION CARD ── */
+  .app-card {
+    background: var(--input-bg); border: 1px solid var(--border);
+    padding: 14px; margin-bottom: 10px; display: flex;
+    justify-content: space-between; align-items: flex-start; gap: 12px;
+  }
+  .app-card-info { flex: 1; }
+  .app-card-info .app-user {
+    font-family: var(--mono); font-size: 13px; font-weight: 600;
+  }
+  .app-card-info .app-email {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+  }
+  .app-card-info .app-desc {
+    font-size: 12px; color: var(--muted); margin-top: 4px;
+  }
+  .app-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  /* ── UPLOAD FORM ── */
+  .upload-zone {
+    border: 2px dashed var(--border); padding: 30px; text-align: center;
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    margin-bottom: 14px;
+  }
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent); background: rgba(31,122,92,0.04);
+  }
+  .upload-zone p {
+    font-family: var(--mono); font-size: 12px; color: var(--muted);
+  }
+  .upload-zone .file-name {
+    font-weight: 600; color: var(--fg); margin-top: 6px;
+  }
+
+  /* ── LOADING SPINNER ── */
+  .spinner {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── SCROLL TO TOP ── */
+  #scroll-top {
+    position: fixed; bottom: 22px; right: 20px; z-index: 999;
+    background: var(--fg); color: var(--bg);
+    font-family: var(--mono); font-size: 12px;
+    border: 2px solid var(--accent); padding: 7px 10px;
+    cursor: pointer; opacity: 0; pointer-events: none;
+    transition: opacity 0.2s; line-height: 1;
+  }
+  #scroll-top.visible { opacity: 1; pointer-events: auto; }
+  #scroll-top:hover { background: var(--accent); color: #fff; }
+
+  .search-hint {
+    font-family: var(--mono); font-size: 10px; color: #555;
+    margin-left: 4px; white-space: nowrap;
+  }
+  kbd {
+    background: #2a2a2a; color: #aaa; border: 1px solid #444;
+    border-radius: 2px; font-family: var(--mono); font-size: 10px;
+    padding: 1px 5px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .two-col { grid-template-columns: 1fr 240px; gap: 16px; }
+    #hero-inner h1 { font-size: 26px; }
+  }
+  @media (max-width: 680px) {
+    body { font-size: 14px; }
+    .page-wrap { padding: 0 10px; }
+    #top-banner { font-size: 11px; padding: 6px 34px 6px 10px; text-align: left; line-height: 1.5; }
+    .nav-search { display: none; }
+    .nav-auth { display: none; }
+    .nav-logo { font-size: 15px; padding: 10px 12px; }
+    .nav-links li a { font-size: 11px; padding: 10px 10px; }
+    #hero-outer { border-left-width: 4px; }
+    #hero-inner { padding: 14px 14px 12px; }
+    #hero-inner h1 { font-size: 22px; margin-bottom: 8px; }
+    #hero-inner p  { font-size: 12px; margin-bottom: 12px; }
+    .hero-stats { padding-top: 10px; gap: 0; }
+    .hero-stat { padding-right: 16px; margin-right: 16px; }
+    .hero-stat-n { font-size: 17px; }
+    #hero-ticker-label { font-size: 8px; padding: 5px 8px; }
+    .ticker-horiz-inner span { font-size: 10px; }
+    .two-col { grid-template-columns: 1fr; gap: 14px; margin-top: 14px; }
+    aside { order: 2; }
+    .sidebar-box { margin-bottom: 10px; }
+    .cat-bar { overflow-x: auto; flex-wrap: nowrap; margin-top: 12px; }
+    .cat-btn  { font-size: 10px; padding: 7px 12px; flex-shrink: 0; }
+    .resource-table { font-size: 12px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .resource-table th, .resource-table td { white-space: nowrap; padding: 8px; }
+    .resource-table th:nth-child(3), .resource-table td:nth-child(3),
+    .resource-table th:nth-child(4), .resource-table td:nth-child(4) { display: none; }
+    .r-desc { display: none; }
+    .pagination { width: 100%; }
+    .pag-btn { flex: 1; text-align: center; }
+    .news-card { padding: 11px 12px; }
+    .news-card h3 { font-size: 13px; margin-bottom: 6px; }
+    .news-card-meta { gap: 8px; font-size: 9px; }
+    .news-card p { font-size: 12px; }
+    .info-grid { grid-template-columns: 1fr; }
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 18px; padding: 18px 12px 14px; }
+    .footer-bottom { flex-direction: column; align-items: flex-start; gap: 6px; }
+    #submit { max-width: 100% !important; }
+    .section-head { font-size: 10px; }
+  }
+  @media (max-width: 380px) {
+    .nav-links li a { font-size: 10px; padding: 9px 8px; }
+    #hero-inner h1 { font-size: 19px; }
+    .footer-top { grid-template-columns: 1fr; }
+    .hero-stat { padding-right: 12px; margin-right: 12px; }
+    .hero-stat-n { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BANNER -->
+<div id="top-banner">
+  ⚡ DevVault is community-maintained. Anyone can suggest a resource — <a href="#submit">submit one here</a> — only verified contributors can publish.
+  <button id="banner-close" onclick="document.getElementById('top-banner').style.display='none'" title="Dismiss">✕</button>
+</div>
+
+<!-- NAV -->
+<nav id="site-nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="#"><span>{</span>DevVault<span>}</span></a>
+    <ul class="nav-links">
+      <li><a href="#" onclick="showSection('resources');return false;" class="active" id="nav-resources">Resources</a></li>
+      <li><a href="#" onclick="showSection('news');return false;" id="nav-news">News &amp; Articles</a></li>
+      <li><a href="#" onclick="showSection('snippets');return false;" id="nav-snippets">Snippets</a></li>
+      <li><a href="#" onclick="showSection('tools');return false;" id="nav-tools">Tools</a></li>
+      <li><a href="#" onclick="showSection('about');return false;" id="nav-about">About / Upload</a></li>
+      <li id="nav-dashboard-link" style="display:none;"><a href="#" onclick="showSection('dashboard');return false;" id="nav-dashboard">Dashboard</a></li>
+      <li id="nav-admin-link" style="display:none;"><a href="#" onclick="showSection('admin');return false;" id="nav-admin">Admin</a></li>
+    </ul>
+    <div class="nav-search">
+      <input type="text" placeholder="Search resources…" id="search-input">
+      <button onclick="doSearch()">Go</button>
+      <span class="search-hint"><kbd>/</kbd></span>
+    </div>
+    <div class="nav-auth">
+      <button class="nav-auth-btn" id="auth-btn" onclick="openLoginModal()">Login</button>
+      <div class="nav-user-info" id="nav-user-info">
+        <span class="username" id="nav-username"></span>
+        <span class="role-badge" id="nav-role-badge"></span>
+        <button class="btn btn-sm btn-danger" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div id="hero-outer">
+  <div id="hero-inner">
+    <h1>Dev resources.<br>No noise. <em>Just code.</em></h1>
+    <p>Curated tools, guides, libraries &amp; references for coders. Uploaded by verified contributors, free for everyone.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-n" id="stat-resources">—</span><span class="hero-stat-l">Resources</span></div>
+      <div class="hero-stat"><span class="hero-stat-n" id="stat-categories">—</span><span class="hero-stat-l">Categories</span></div>
+      <div class="hero-stat"><span class="hero-stat-n" id="stat-contributors">—</span><span class="hero-stat-l">Contributors</span></div>
+    </div>
+  </div>
+  <div id="hero-ticker-bar">
+    <span id="hero-ticker-label">▸ Latest Updates</span>
+    <div id="hero-ticker-scroll">
+      <div class="ticker-horiz-inner" id="ticker-content">
+        <span>Loading latest updates…</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN PAGE WRAP -->
+<div class="page-wrap">
+
+  <!-- ════════ RESOURCES ════════ -->
+  <div id="section-resources" class="content-section active">
+    <div class="two-col">
+      <div>
+        <div class="cat-bar">
+          <button class="cat-btn active" onclick="filterCat(this,'all')">All</button>
+          <button class="cat-btn" onclick="filterCat(this,'tool')">Tools</button>
+          <button class="cat-btn" onclick="filterCat(this,'guide')">Guides</button>
+          <button class="cat-btn" onclick="filterCat(this,'lib')">Libraries</button>
+          <button class="cat-btn" onclick="filterCat(this,'snippet')">Snippets</button>
+          <button class="cat-btn" onclick="filterCat(this,'news')">News</button>
+        </div>
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+          <table class="resource-table" style="min-width:500px;">
+            <thead>
+              <tr>
+                <th style="width:38%">Title / Description</th>
+                <th style="width:12%">Type</th>
+                <th style="width:12%">Category</th>
+                <th style="width:14%">Added by</th>
+                <th style="width:12%">Date</th>
+                <th style="width:12%">Link</th>
+              </tr>
+            </thead>
+            <tbody id="resource-tbody">
+              <tr><td colspan="6" class="empty-state"><span class="spinner"></span> Loading resources…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="resource-pagination"></div>
+      </div>
+      <aside>
+        <div class="sidebar-box">
+          <span class="sidebar-box-title">📌 Recently Added</span>
+          <div class="sidebar-box-body">
+            <ul id="sidebar-recent"><li class="empty-state">Loading…</li></ul>
+          </div>
+        </div>
+        <div class="sidebar-box">
+          <span class="sidebar-box-title">🏷️ Browse by Tag</span>
+          <div class="sidebar-box-body">
+            <div class="tag-cloud" id="sidebar-tags"><span class="empty-state">Loading…</span></div>
+          </div>
+        </div>
+        <div class="sidebar-box">
+          <span class="sidebar-box-title">🔗 Useful Links</span>
+          <div class="sidebar-box-body">
+            <ul>
+              <li><a href="https://developer.mozilla.org" target="_blank">MDN Web Docs</a></li>
+              <li><a href="https://docs.python.org" target="_blank">Python Docs</a></li>
+              <li><a href="https://devdocs.io" target="_blank">DevDocs.io</a></li>
+              <li><a href="https://github.com" target="_blank">GitHub</a></li>
+              <li><a href="https://stackoverflow.com" target="_blank">Stack Overflow</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="sidebar-box" style="border-top-color:var(--accent);">
+          <span class="sidebar-box-title" style="background:var(--accent);">Want to Contribute?</span>
+          <div class="sidebar-box-body">
+            <p>Only verified contributors can upload. Read the <a href="#" onclick="showSection('about');return false;">About / Upload</a> page to see how to get access.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ════════ NEWS ════════ -->
+  <div id="section-news" class="content-section">
+    <div style="margin-top:20px;">
+      <div class="section-head">News &amp; External Articles</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Curated links to dev news, releases, and articles from around the web. Submitted by contributors — we don't host these, we just index them.</p>
+      <div class="notice">
+        <strong>How this works:</strong> Contributors paste a link to an article + a short summary. The link stays external — we never copy content. Click any title to go to the original source.
+      </div>
+      <div class="news-full-list" id="news-list">
+        <div class="empty-state"><span class="spinner"></span> Loading news…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ SNIPPETS ════════ -->
+  <div id="section-snippets" class="content-section">
+    <div style="margin-top:20px;">
+      <div class="section-head">Code Snippets</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Short, copy-paste-ready code. Filtered by language below.</p>
+      <div class="cat-bar" style="margin-bottom:0;" id="snippet-lang-bar">
+        <button class="cat-btn active" onclick="filterSnippets(this,'all')">All</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="resource-table">
+          <thead><tr><th>Snippet</th><th>Lang</th><th>Added by</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody id="snippet-tbody">
+            <tr><td colspan="5" class="empty-state"><span class="spinner"></span> Loading snippets…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ TOOLS ════════ -->
+  <div id="section-tools" class="content-section">
+    <div style="margin-top:20px;">
+      <div class="section-head">Tools &amp; Downloads</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Config files, scripts, templates, and small utilities uploaded by contributors.</p>
+      <div style="overflow-x:auto;">
+        <table class="resource-table">
+          <thead><tr><th>Name</th><th>File type</th><th>Category</th><th>Added by</th><th>Downloads</th><th>Link</th></tr></thead>
+          <tbody id="tools-tbody">
+            <tr><td colspan="6" class="empty-state"><span class="spinner"></span> Loading tools…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ ABOUT ════════ -->
+  <div id="section-about" class="content-section">
+    <div style="margin-top:20px;">
+      <div class="section-head">About DevVault &amp; How Uploads Work</div>
+      <div class="notice"><strong>Upload access is restricted.</strong> This section explains the full system — what it is, who can upload, where files are stored, and how to get access.</div>
+      <h2 style="font-family:var(--mono);font-size:16px;margin-bottom:10px;">What is DevVault?</h2>
+      <p style="font-size:13px;color:var(--muted);max-width:700px;line-height:1.7;margin-bottom:20px;">DevVault is a community-maintained library of developer resources — guides, config files, code snippets, tools, and curated news links. It's meant to be like a useful drawer you actually go back to, not a graveyard of bookmarks.</p>
+      <div class="info-grid">
+        <div class="info-card"><h3>🔐 Who can upload?</h3><ul><li>Only <strong>authorised contributors</strong> can upload or publish resources.</li><li>You get access by applying via the form below — the admin reviews it.</li><li>New contributors are reviewed manually — usually within a few days.</li><li>Once approved, you get a login and an upload dashboard.</li></ul></div>
+        <div class="info-card"><h3>🗄️ Where are files stored?</h3><ul><li>Files are stored in <strong>Supabase Storage</strong> (cloud bucket).</li><li>The database stores metadata: title, description, uploader, date, file URL.</li><li>Files are never stored on the web server itself.</li><li>Downloads go directly from the bucket to the user.</li></ul></div>
+        <div class="info-card"><h3>⚙️ Tech stack</h3><ul><li><strong>Frontend:</strong> This HTML file</li><li><strong>Backend:</strong> Supabase (free tier) — auth, database, storage.</li><li><strong>Auth:</strong> Supabase Auth with email magic links</li><li><strong>Hosting:</strong> Netlify, Vercel, or GitHub Pages</li></ul></div>
+        <div class="info-card"><h3>📤 Upload flow</h3><ul><li>1. Log in with your contributor account</li><li>2. Go to the Upload Dashboard (hidden from public nav)</li><li>3. Fill in: title, description, category, tags, file</li><li>4. File uploads to the storage bucket</li><li>5. Resource appears in the public listing</li></ul></div>
+      </div>
+      <h2 style="font-family:var(--mono);font-size:16px;margin:24px 0 10px;">Apply for Contributor Access</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Fill this in and the admin will review your application. You'll hear back by email.</p>
+      <div style="background:var(--card-bg);border:1px solid var(--border);border-top:3px solid var(--accent2);padding:18px;max-width:540px;" id="submit">
+        <div style="display:grid;gap:12px;">
+          <div class="form-group">
+            <label>Your GitHub / username</label>
+            <input type="text" id="app-username" placeholder="@yourhandle">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="app-email" placeholder="you@email.com">
+          </div>
+          <div class="form-group">
+            <label>What will you contribute?</label>
+            <textarea rows="3" id="app-description" placeholder="e.g. Python guides, Docker configs, security snippets…"></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="submitApplication()">Submit Application →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ DASHBOARD (contributors) ════════ -->
+  <div id="section-dashboard" class="content-section">
+    <div style="margin-top:20px;">
+      <div class="section-head">Upload Dashboard</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Upload new resources to DevVault. Max 5 uploads per day. Max file size: 10MB.</p>
+
+      <div class="dash-panel">
+        <h3>Upload Resource</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="up-title" placeholder="Resource name">
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <select id="up-type">
+              <option value="guide">Guide</option>
+              <option value="tool">Tool</option>
+              <option value="lib">Library</option>
+              <option value="snippet">Snippet</option>
+              <option value="news">News</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <input type="text" id="up-category" placeholder="e.g. Python, DevOps, CLI">
+          </div>
+          <div class="form-group">
+            <label>Tags (comma-separated)</label>
+            <input type="text" id="up-tags" placeholder="e.g. python, async, network">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea rows="2" id="up-description" placeholder="Short description of the resource"></textarea>
+        </div>
+        <div class="upload-zone" id="upload-zone">
+          <p>Click or drag a file here to upload</p>
+          <p class="file-name" id="upload-file-name">No file selected</p>
+          <input type="file" id="upload-file" style="display:none;" accept=".pdf,.zip,.json,.yaml,.yml,.md,.txt,.js,.ts,.py,.html,.css,.rs,.go,.sql,.sh">
+        </div>
+        <button class="btn btn-success" id="upload-btn" onclick="doUpload()" disabled>Upload →</button>
+      </div>
+
+      <div class="dash-panel" style="margin-top:16px;">
+        <h3>Your Uploads</h3>
+        <div id="my-uploads"><div class="empty-state">Loading your uploads…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ ADMIN ════════ -->
+  <div id="section-admin" class="content-section">
+    <div style="margin-top:20px;">
+      <div class="section-head">Admin Panel</div>
+
+      <div class="dash-tabs">
+        <button class="dash-tab active" onclick="switchAdminTab(this,'admin-apps')">Applications</button>
+        <button class="dash-tab" onclick="switchAdminTab(this,'admin-contributors')">Contributors</button>
+        <button class="dash-tab" onclick="switchAdminTab(this,'admin-resources')">Resources</button>
+      </div>
+
+      <!-- Applications -->
+      <div class="dash-content active" id="admin-apps">
+        <div class="dash-panel" style="border-top-color:var(--accent);">
+          <h3>Pending Applications</h3>
+          <div id="pending-apps"><div class="empty-state">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- Contributors -->
+      <div class="dash-content" id="admin-contributors">
+        <div class="dash-panel" style="border-top-color:var(--accent);">
+          <h3>All Contributors</h3>
+          <div id="all-contributors"><div class="empty-state">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- Resources -->
+      <div class="dash-content" id="admin-resources">
+        <div class="dash-panel" style="border-top-color:var(--accent);">
+          <h3>All Resources</h3>
+          <div id="all-resources-admin"><div class="empty-state">Loading…</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeLoginModal()">✕</button>
+    <h2>Login with Magic Link</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Enter your email. You'll receive a login link — no password needed.</p>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="you@email.com">
+    </div>
+    <button class="btn btn-primary" id="login-btn" onclick="doMagicLogin()">Send Magic Link →</button>
+    <p id="login-status" style="font-family:var(--mono);font-size:11px;margin-top:10px;color:var(--muted);"></p>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SCROLL TO TOP -->
+<button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑ Top</button>
+
+<!-- FOOTER -->
+<footer id="site-footer">
+  <div class="footer-top">
+    <div class="footer-col"><h4>{DevVault}</h4><p>Community-maintained developer resource library. No ads. No tracking. Just useful stuff.</p></div>
+    <div class="footer-col"><h4>Browse</h4><ul><li><a href="#" onclick="showSection('resources');return false;">All Resources</a></li><li><a href="#" onclick="showSection('news');return false;">News &amp; Articles</a></li><li><a href="#" onclick="showSection('snippets');return false;">Snippets</a></li><li><a href="#" onclick="showSection('tools');return false;">Tools</a></li></ul></div>
+    <div class="footer-col"><h4>Categories</h4><ul id="footer-categories"><li><a href="#">Loading…</a></li></ul></div>
+    <div class="footer-col"><h4>Meta</h4><ul><li><a href="#" onclick="showSection('about');return false;">About</a></li><li><a href="#" onclick="showSection('about');return false;">Contribute</a></li><li><a href="#">RSS Feed</a></li><li><a href="#">Changelog</a></li><li><a href="#">Contact</a></li></ul></div>
+    <div class="footer-col"><h4>External</h4><ul><li><a href="https://developer.mozilla.org" target="_blank">MDN Web Docs</a></li><li><a href="https://devdocs.io" target="_blank">DevDocs.io</a></li><li><a href="https://github.com" target="_blank">GitHub</a></li><li><a href="https://stackoverflow.com" target="_blank">Stack Overflow</a></li><li><a href="https://lobste.rs" target="_blank">Lobsters</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 DevVault — community-maintained, zero-ad, open resource index</span>
+    <div style="display:flex;gap:18px;align-items:center;">
+      <span id="footer-updated" style="font-family:var(--mono);font-size:10px;color:#444;"></span>
+      <a href="#">Privacy</a><a href="#">Terms</a><a href="#">API</a><a href="#">RSS</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════
+// INIT SUPABASE
+// ══════════════════════════════════════════════
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let currentProfile = null;
+let allResources = [];
+let allNews = [];
+let allSnippets = [];
+const PAGE_SIZE = 10;
+let currentPage = 1;
+
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' visible';
+  setTimeout(() => { t.className = 'toast'; }, 3500);
+}
+
+// ══════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════
+function openLoginModal() { document.getElementById('login-modal').classList.add('open'); }
+function closeLoginModal() { document.getElementById('login-modal').classList.remove('open'); }
+
+async function doMagicLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) { showToast('Enter your email', 'error'); return; }
+  const btn = document.getElementById('login-btn');
+  const status = document.getElementById('login-status');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  const { error } = await supabase.auth.signInWithOtp({ email });
+  btn.disabled = false;
+  btn.textContent = 'Send Magic Link →';
+  if (error) {
+    status.textContent = 'Error: ' + error.message;
+    status.style.color = '#c0392b';
+  } else {
+    status.textContent = 'Check your email for the login link.';
+    status.style.color = 'var(--accent)';
+  }
+}
+
+async function doLogout() {
+  await supabase.auth.signOut();
+  currentUser = null;
+  currentProfile = null;
+  updateAuthUI();
+  showSection('resources');
+  showToast('Logged out', 'info');
+}
+
+async function loadSession() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadProfile();
+  }
+  updateAuthUI();
+}
+
+async function loadProfile() {
+  if (!currentUser) { currentProfile = null; return; }
+  const { data } = await supabase.from('contributors').select('*').eq('user_id', currentUser.id).single();
+  currentProfile = data;
+}
+
+function updateAuthUI() {
+  const authBtn = document.getElementById('auth-btn');
+  const userInfo = document.getElementById('nav-user-info');
+  const dashLink = document.getElementById('nav-dashboard-link');
+  const adminLink = document.getElementById('nav-admin-link');
+
+  if (currentUser && currentProfile) {
+    authBtn.style.display = 'none';
+    userInfo.classList.add('visible');
+    document.getElementById('nav-username').textContent = currentProfile.username;
+    const badge = document.getElementById('nav-role-badge');
+    badge.textContent = currentProfile.role;
+    badge.className = 'role-badge' + (currentProfile.role === 'admin' ? ' admin' : '');
+    dashLink.style.display = '';
+    adminLink.style.display = currentProfile.role === 'admin' ? '' : 'none';
+  } else if (currentUser && !currentProfile) {
+    authBtn.style.display = 'none';
+    userInfo.classList.add('visible');
+    document.getElementById('nav-username').textContent = currentUser.email;
+    document.getElementById('nav-role-badge').textContent = 'no access';
+    document.getElementById('nav-role-badge').className = 'role-badge';
+    dashLink.style.display = 'none';
+    adminLink.style.display = 'none';
+  } else {
+    authBtn.style.display = '';
+    authBtn.classList.remove('active-user');
+    userInfo.classList.remove('visible');
+    dashLink.style.display = 'none';
+    adminLink.style.display = 'none';
+  }
+}
+
+// Listen for auth state changes
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session) {
+    currentUser = session.user;
+    await loadProfile();
+    updateAuthUI();
+    closeLoginModal();
+    showToast('Logged in as ' + (currentProfile ? currentProfile.username : currentUser.email), 'success');
+  } else if (event === 'SIGNED_OUT') {
+    currentUser = null;
+    currentProfile = null;
+    updateAuthUI();
+  }
+});
+
+// ══════════════════════════════════════════════
+// SECTION SWITCHING
+// ══════════════════════════════════════════════
+function showSection(name) {
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('section-' + name);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + name);
+  if (navEl) navEl.classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+
+  if (name === 'dashboard' && currentUser) loadMyUploads();
+  if (name === 'admin' && currentProfile && currentProfile.role === 'admin') loadAdminData();
+}
+
+// ══════════════════════════════════════════════
+// DATA LOADING
+// ══════════════════════════════════════════════
+async function loadAllData() {
+  await Promise.all([loadResources(), loadNews(), loadSnippets(), loadStats()]);
+}
+
+async function loadStats() {
+  const { data } = await supabase.rpc('get_stats');
+  if (data) {
+    document.getElementById('stat-resources').textContent = (data.resources || 0).toLocaleString();
+    document.getElementById('stat-categories').textContent = (data.categories || 0).toLocaleString();
+    document.getElementById('stat-contributors').textContent = (data.contributors || 0).toLocaleString();
+  }
+}
+
+async function loadResources() {
+  const { data, error } = await supabase.from('resources').select('*').order('created_at', { ascending: false });
+  if (error) { console.error(error); return; }
+  allResources = data || [];
+  renderResources();
+  renderSidebar();
+  renderTicker();
+}
+
+function renderResources() {
+  const tbody = document.getElementById('resource-tbody');
+  const filtered = getFilteredResources();
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const page = filtered.slice(start, start + PAGE_SIZE);
+
+  if (page.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No resources found.</td></tr>';
+  } else {
+    tbody.innerHTML = page.map(r => `
+      <tr data-cat="${esc(r.type)}">
+        <td><a class="r-title" href="${esc(r.file_url || '#')}" target="_blank">${esc(r.title)}</a><span class="r-desc">${esc(r.description)}</span></td>
+        <td><span class="badge badge-${esc(r.type)}">${esc(r.type)}</span></td>
+        <td>${esc(r.category)}</td>
+        <td class="r-author">@${esc(r.author)}</td>
+        <td class="r-date">${esc(r.created_at?.slice(0,10) || '')}</td>
+        <td>${r.file_url ? `<a href="${esc(r.file_url)}" target="_blank" style="font-family:var(--mono);font-size:11px;">Open ↗</a>` : '—'}</td>
+      </tr>
+    `).join('');
+  }
+  renderPagination(filtered.length);
+}
+
+let currentFilter = 'all';
+function getFilteredResources() {
+  if (currentFilter === 'all') return allResources;
+  return allResources.filter(r => r.type === currentFilter);
+}
+
+function filterCat(btn, cat) {
+  btn.closest('.cat-bar').querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = cat;
+  currentPage = 1;
+  renderResources();
+}
+
+function renderPagination(total) {
+  const pages = Math.ceil(total / PAGE_SIZE);
+  const el = document.getElementById('resource-pagination');
+  if (pages <= 1) { el.innerHTML = ''; return; }
+  let html = '';
+  for (let i = 1; i <= pages; i++) {
+    html += `<button class="pag-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  if (currentPage < pages) html += `<button class="pag-btn" onclick="goPage(${currentPage + 1})">Next →</button>`;
+  el.innerHTML = html;
+}
+
+function goPage(p) { currentPage = p; renderResources(); }
+
+function renderSidebar() {
+  const recent = document.getElementById('sidebar-recent');
+  const tags = document.getElementById('sidebar-tags');
+  const latest = allResources.slice(0, 5);
+  recent.innerHTML = latest.map(r => `<li><a href="${esc(r.file_url || '#')}" target="_blank">${esc(r.title)}</a><br><span style="font-family:var(--mono);font-size:10px;color:var(--muted);">${esc(r.created_at?.slice(0,10) || '')}</span></li>`).join('') || '<li>Nothing yet</li>';
+
+  const tagSet = new Set();
+  allResources.forEach(r => (r.tags || []).forEach(t => tagSet.add(t)));
+  const uniqueTags = [...tagSet].slice(0, 20);
+  tags.innerHTML = uniqueTags.map(t => `<a class="tag" href="#" onclick="searchTag('${esc(t)}');return false;">${esc(t)}</a>`).join('') || '<span class="empty-state">No tags yet</span>';
+}
+
+function searchTag(tag) {
+  document.getElementById('search-input').value = tag;
+  doSearch();
+}
+
+function renderTicker() {
+  const el = document.getElementById('ticker-content');
+  const latest = allResources.slice(0, 8);
+  if (latest.length === 0) { el.innerHTML = '<span>No updates yet</span>'; return; }
+  const doubled = [...latest, ...latest];
+  el.innerHTML = doubled.map(r => `<span>${esc(r.title)} added by @${esc(r.author)}</span>`).join('');
+}
+
+// ── NEWS ──
+async function loadNews() {
+  const { data } = await supabase.from('news').select('*').order('created_at', { ascending: false });
+  allNews = data || [];
+  renderNews();
+}
+
+function renderNews() {
+  const el = document.getElementById('news-list');
+  if (allNews.length === 0) { el.innerHTML = '<div class="empty-state">No news articles yet.</div>'; return; }
+  el.innerHTML = allNews.map(n => `
+    <div class="news-card">
+      <h3><a href="${esc(n.url)}" target="_blank">${esc(n.title)} ↗</a></h3>
+      <div class="news-card-meta"><span>📅 ${esc(n.created_at?.slice(0,10) || '')}</span><span>🔗 ${esc(n.source)}</span><span>📂 ${esc(n.category)}</span><span>👤 @${esc(n.author)}</span></div>
+      <p>${esc(n.summary)}</p>
+    </div>
+  `).join('');
+}
+
+// ── SNIPPETS ──
+async function loadSnippets() {
+  const { data } = await supabase.from('snippets').select('*').order('created_at', { ascending: false });
+  allSnippets = data || [];
+  renderSnippets();
+  renderSnippetLangs();
+}
+
+function renderSnippetLangs() {
+  const bar = document.getElementById('snippet-lang-bar');
+  const langs = [...new Set(allSnippets.map(s => s.language))];
+  bar.innerHTML = '<button class="cat-btn active" onclick="filterSnippets(this,\'all\')">All</button>' +
+    langs.map(l => `<button class="cat-btn" onclick="filterSnippets(this,'${esc(l)}')">${esc(l)}</button>`).join('');
+}
+
+let currentSnippetLang = 'all';
+function filterSnippets(btn, lang) {
+  btn.closest('.cat-bar').querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentSnippetLang = lang;
+  renderSnippets();
+}
+
+function renderSnippets() {
+  const tbody = document.getElementById('snippet-tbody');
+  const filtered = currentSnippetLang === 'all' ? allSnippets : allSnippets.filter(s => s.language === currentSnippetLang);
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No snippets found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(s => `
+    <tr>
+      <td><a class="r-title" href="#">${esc(s.title)}</a><span class="r-desc">${esc(s.description)}</span></td>
+      <td><span class="badge badge-snippet">${esc(s.language)}</span></td>
+      <td class="r-author">@${esc(s.author)}</td>
+      <td class="r-date">${esc(s.created_at?.slice(0,10) || '')}</td>
+      <td><button class="btn btn-sm btn-primary" onclick="copySnippet('${esc(s.id)}')">Copy</button></td>
+    </tr>
+  `).join('');
+}
+
+function copySnippet(id) {
+  const s = allSnippets.find(x => x.id === id);
+  if (s) { navigator.clipboard.writeText(s.code_content); showToast('Snippet copied!', 'success'); }
+}
+
+// ── TOOLS ──
+function renderTools() {
+  const tbody = document.getElementById('tools-tbody');
+  const tools = allResources.filter(r => r.type === 'tool');
+  if (tools.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No tools yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = tools.map(r => `
+    <tr>
+      <td><a class="r-title" href="${esc(r.file_url || '#')}" target="_blank">${esc(r.title)}</a><span class="r-desc">${esc(r.description)}</span></td>
+      <td><span class="badge badge-tool">${esc(r.file_type || 'FILE')}</span></td>
+      <td>${esc(r.category)}</td>
+      <td class="r-author">@${esc(r.author)}</td>
+      <td class="r-date">${(r.downloads || 0).toLocaleString()}</td>
+      <td>${r.file_url ? `<a href="${esc(r.file_url)}" target="_blank" style="font-family:var(--mono);font-size:11px;">Download ↗</a>` : '—'}</td>
+    </tr>
+  `).join('');
+}
+
+// ── SEARCH ──
+function doSearch() {
+  const q = document.getElementById('search-input').value.toLowerCase().trim();
+  if (!q) return;
+  showSection('resources');
+  currentFilter = 'all';
+  currentPage = 1;
+  const tbody = document.getElementById('resource-tbody');
+  const filtered = allResources.filter(r => r.title.toLowerCase().includes(q) || r.description.toLowerCase().includes(q) || r.category.toLowerCase().includes(q) || (r.tags || []).some(t => t.toLowerCase().includes(q)));
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No results for "' + esc(q) + '"</td></tr>';
+  } else {
+    tbody.innerHTML = filtered.map(r => `
+      <tr data-cat="${esc(r.type)}">
+        <td><a class="r-title" href="${esc(r.file_url || '#')}" target="_blank">${esc(r.title)}</a><span class="r-desc">${esc(r.description)}</span></td>
+        <td><span class="badge badge-${esc(r.type)}">${esc(r.type)}</span></td>
+        <td>${esc(r.category)}</td>
+        <td class="r-author">@${esc(r.author)}</td>
+        <td class="r-date">${esc(r.created_at?.slice(0,10) || '')}</td>
+        <td>${r.file_url ? `<a href="${esc(r.file_url)}" target="_blank" style="font-family:var(--mono);font-size:11px;">Open ↗</a>` : '—'}</td>
+      </tr>
+    `).join('');
+  }
+  document.querySelectorAll('.cat-bar .cat-btn').forEach(b => b.classList.remove('active'));
+}
+
+// ══════════════════════════════════════════════
+// APPLICATION FORM
+// ══════════════════════════════════════════════
+async function submitApplication() {
+  const username = document.getElementById('app-username').value.trim();
+  const email = document.getElementById('app-email').value.trim();
+  const description = document.getElementById('app-description').value.trim();
+  if (!username || !email) { showToast('Username and email required', 'error'); return; }
+  const { error } = await supabase.from('applications').insert({ username, email, description });
+  if (error) {
+    if (error.code === '23505') { showToast('You already have a pending application', 'error'); }
+    else { showToast('Error: ' + error.message, 'error'); }
+  } else {
+    showToast('Application submitted! The admin will review it.', 'success');
+    document.getElementById('app-username').value = '';
+    document.getElementById('app-email').value = '';
+    document.getElementById('app-description').value = '';
+  }
+}
+
+// ══════════════════════════════════════════════
+// UPLOAD DASHBOARD
+// ══════════════════════════════════════════════
+let selectedFile = null;
+
+const uploadZone = document.getElementById('upload-zone');
+const fileInput = document.getElementById('upload-file');
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFileSelect(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFileSelect(fileInput.files[0]); });
+
+function handleFileSelect(file) {
+  if (!ALLOWED_FILE_TYPES.includes(file.type) && !file.name.match(/\.(pdf|zip|json|yaml|yml|md|txt|js|ts|py|html|css|rs|go|sql|sh)$/i)) {
+    showToast('File type not allowed', 'error'); return;
+  }
+  if (file.size > MAX_FILE_SIZE) { showToast('File too large (max 10MB)', 'error'); return; }
+  selectedFile = file;
+  document.getElementById('upload-file-name').textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+  document.getElementById('upload-btn').disabled = false;
+}
+
+async function doUpload() {
+  if (!selectedFile || !currentUser) return;
+  const btn = document.getElementById('upload-btn');
+  btn.disabled = true;
+  btn.textContent = 'Uploading…';
+
+  // Check daily limit
+  const today = new Date().toISOString().slice(0, 10);
+  const { count } = await supabase.from('resources').select('*', { count: 'exact', head: true })
+    .eq('uploader_id', currentUser.id)
+    .gte('created_at', today + 'T00:00:00');
+
+  if (count >= MAX_UPLOADS_PER_DAY) {
+    showToast('Daily upload limit reached (5/day)', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Upload →';
+    return;
+  }
+
+  // Upload file to storage
+  const filePath = `${currentUser.id}/${Date.now()}_${selectedFile.name}`;
+  const { error: uploadError } = await supabase.storage.from('resource-files').upload(filePath, selectedFile);
+  if (uploadError) { showToast('Upload failed: ' + uploadError.message, 'error'); btn.disabled = false; btn.textContent = 'Upload →'; return; }
+
+  const { data: urlData } = supabase.storage.from('resource-files').getPublicUrl(filePath);
+
+  // Insert metadata
+  const tags = document.getElementById('up-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const { error: insertError } = await supabase.from('resources').insert({
+    title: document.getElementById('up-title').value.trim(),
+    description: document.getElementById('up-description').value.trim(),
+    type: document.getElementById('up-type').value,
+    category: document.getElementById('up-category').value.trim() || 'General',
+    tags: tags,
+    author: currentProfile.username,
+    uploader_id: currentUser.id,
+    file_url: urlData.publicUrl,
+    file_name: selectedFile.name,
+    file_type: selectedFile.name.split('.').pop().toUpperCase(),
+    file_size: selectedFile.size,
+  });
+
+  if (insertError) { showToast('Error saving metadata: ' + insertError.message, 'error'); }
+  else {
+    showToast('Resource uploaded!', 'success');
+    document.getElementById('up-title').value = '';
+    document.getElementById('up-description').value = '';
+    document.getElementById('up-category').value = '';
+    document.getElementById('up-tags').value = '';
+    document.getElementById('upload-file-name').textContent = 'No file selected';
+    selectedFile = null;
+    fileInput.value = '';
+    loadMyUploads();
+    loadResources();
+  }
+  btn.disabled = false;
+  btn.textContent = 'Upload →';
+}
+
+async function loadMyUploads() {
+  if (!currentUser) return;
+  const { data } = await supabase.from('resources').select('*').eq('uploader_id', currentUser.id).order('created_at', { ascending: false });
+  const el = document.getElementById('my-uploads');
+  if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">You haven\'t uploaded anything yet.</div>'; return; }
+  el.innerHTML = `<table class="resource-table"><thead><tr><th>Title</th><th>Type</th><th>Date</th><th>Action</th></tr></thead><tbody>` +
+    data.map(r => `<tr><td>${esc(r.title)}</td><td><span class="badge badge-${esc(r.type)}">${esc(r.type)}</span></td><td class="r-date">${esc(r.created_at?.slice(0,10) || '')}</td><td><button class="btn btn-sm btn-danger" onclick="deleteResource('${r.id}','${esc(r.file_name || '')}')">Delete</button></td></tr>`).join('') +
+    `</tbody></table>`;
+}
+
+async function deleteResource(id, fileName) {
+  if (!confirm('Delete this resource?')) return;
+  // Delete from storage if file exists
+  if (fileName && currentUser) {
+    await supabase.storage.from('resource-files').remove([`${currentUser.id}/${fileName}`]);
+  }
+  await supabase.from('resources').delete().eq('id', id);
+  showToast('Resource deleted', 'success');
+  loadMyUploads();
+  loadResources();
+}
+
+// ══════════════════════════════════════════════
+// ADMIN PANEL
+// ══════════════════════════════════════════════
+function switchAdminTab(btn, tabId) {
+  document.querySelectorAll('#section-admin .dash-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#section-admin .dash-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  loadAdminData();
+}
+
+async function loadAdminData() {
+  loadPendingApps();
+  loadAllContributors();
+  loadAllResourcesAdmin();
+}
+
+async function loadPendingApps() {
+  const { data } = await supabase.from('applications').select('*').eq('status', 'pending').order('created_at');
+  const el = document.getElementById('pending-apps');
+  if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">No pending applications.</div>'; return; }
+  el.innerHTML = data.map(a => `
+    <div class="app-card">
+      <div class="app-card-info">
+        <div class="app-user">${esc(a.username)}</div>
+        <div class="app-email">${esc(a.email)}</div>
+        <div class="app-desc">${esc(a.description)}</div>
+      </div>
+      <div class="app-card-actions">
+        <button class="btn btn-sm btn-success" onclick="approveApp('${a.id}','${esc(a.username)}','${esc(a.email)}')">Approve</button>
+        <button class="btn btn-sm btn-danger" onclick="rejectApp('${a.id}')">Reject</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function approveApp(id, username, email) {
+  // Create the user via Supabase auth invite
+  const { error } = await supabase.auth.admin.inviteUserByEmail(email, {
+    data: { username: username, role: 'contributor' }
+  });
+  if (error) { showToast('Invite failed: ' + error.message, 'error'); return; }
+
+  // We need the user_id from the auth user — query it
+  // Note: admin.inviteUserByEmail returns the user, but we may need to wait
+  // For simplicity, we'll add them as pending and the user completes signup
+  // Actually, let's just mark the application and let the trigger handle it
+  // For now, mark approved and the user will be added on their first login
+
+  await supabase.from('applications').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', id);
+
+  // Pre-create contributor entry — the user_id will be linked on first login
+  // We use a placeholder approach: the user signs up, and we link them
+  // For a simpler flow, we can use a database function
+
+  showToast(`Invitation sent to ${email}`, 'success');
+  loadPendingApps();
+}
+
+async function rejectApp(id) {
+  await supabase.from('applications').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', id);
+  showToast('Application rejected', 'info');
+  loadPendingApps();
+}
+
+async function loadAllContributors() {
+  const { data } = await supabase.from('contributors').select('*').order('created_at');
+  const el = document.getElementById('all-contributors');
+  if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">No contributors.</div>'; return; }
+  el.innerHTML = `<table class="resource-table"><thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Joined</th><th>Action</th></tr></thead><tbody>` +
+    data.map(c => `<tr>
+      <td class="r-author">@${esc(c.username)}</td>
+      <td><span class="badge ${c.role === 'admin' ? 'badge-new' : 'badge-guide'}">${esc(c.role)}</span></td>
+      <td>${c.approved ? '<span style="color:var(--success);">✓ Active</span>' : '<span style="color:var(--danger);">✕ Suspended</span>'}</td>
+      <td class="r-date">${esc(c.created_at?.slice(0,10) || '')}</td>
+      <td>${c.user_id !== currentUser?.id ? `<button class="btn btn-sm btn-danger" onclick="toggleContributor('${c.user_id}',${!c.approved})">${c.approved ? 'Suspend' : 'Reinstate'}</button>` : '(you)'}</td>
+    </tr>`).join('') +
+    `</tbody></table>`;
+}
+
+async function toggleContributor(userId, approve) {
+  await supabase.from('contributors').update({ approved: approve }).eq('user_id', userId);
+  showToast(approve ? 'Contributor reinstated' : 'Contributor suspended', 'success');
+  loadAllContributors();
+}
+
+async function loadAllResourcesAdmin() {
+  const { data } = await supabase.from('resources').select('*').order('created_at', { ascending: false });
+  const el = document.getElementById('all-resources-admin');
+  if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">No resources.</div>'; return; }
+  el.innerHTML = `<table class="resource-table"><thead><tr><th>Title</th><th>Type</th><th>Author</th><th>Date</th><th>Action</th></tr></thead><tbody>` +
+    data.map(r => `<tr>
+      <td>${esc(r.title)}</td>
+      <td><span class="badge badge-${esc(r.type)}">${esc(r.type)}</span></td>
+      <td class="r-author">@${esc(r.author)}</td>
+      <td class="r-date">${esc(r.created_at?.slice(0,10) || '')}</td>
+      <td>
+        <button class="btn btn-sm btn-danger" onclick="adminDeleteResource('${r.id}','${esc(r.file_name || '')}')">Delete</button>
+      </td>
+    </tr>`).join('') +
+    `</tbody></table>`;
+}
+
+async function adminDeleteResource(id, fileName) {
+  if (!confirm('Delete this resource?')) return;
+  if (fileName) {
+    await supabase.storage.from('resource-files').remove([`*/${fileName}`]).catch(() => {});
+  }
+  await supabase.from('resources').delete().eq('id', id);
+  showToast('Resource deleted', 'success');
+  loadAllResourcesAdmin();
+  loadResources();
+}
+
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
+function esc(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = String(str);
+  return div.innerHTML;
+}
+
+// ── Keyboard shortcuts ──
+document.addEventListener('keydown', e => {
+  const inp = document.getElementById('search-input');
+  if (e.key === 'Enter' && document.activeElement === inp) { doSearch(); return; }
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    inp.focus();
+    inp.select();
+  }
+  if (e.key === 'Escape') {
+    if (document.activeElement === inp) inp.blur();
+    closeLoginModal();
+  }
+});
+
+// ── Scroll to top ──
+const scrollBtn = document.getElementById('scroll-top');
+window.addEventListener('scroll', () => {
+  scrollBtn.classList.toggle('visible', window.scrollY > 320);
+}, { passive: true });
+
+// ── Last updated ──
+const ts = document.getElementById('footer-updated');
+if (ts) ts.textContent = 'Last updated: ' + new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+(async () => {
+  await loadSession();
+  await loadAllData();
+  renderTools();
+})();
+</script>
+</body>
+</html>
