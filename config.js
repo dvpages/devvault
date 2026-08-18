@@ -3,8 +3,8 @@
 // Fill in your Supabase project URL + anon key
 // ══════════════════════════════════════════════
 
-const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
+const SUPABASE_URL = 'https://wrfpfibxiufnunhfuofg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_u3RQTUMUNU8LiNxYrsGdbw_hs9Al7S8';
 
 // Allowed file types for upload
 const ALLOWED_FILE_TYPES = [
