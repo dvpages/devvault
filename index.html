@@ -984,7 +984,7 @@
 // ══════════════════════════════════════════════
 // INIT SUPABASE
 // ══════════════════════════════════════════════
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
 let currentProfile = null;
@@ -1017,7 +1017,7 @@ async function doMagicLogin() {
   const status = document.getElementById('login-status');
   btn.disabled = true;
   btn.textContent = 'Sending…';
-  const { error } = await supabase.auth.signInWithOtp({ email });
+  const { error } = await db.auth.signInWithOtp({ email });
   btn.disabled = false;
   btn.textContent = 'Send Magic Link →';
   if (error) {
@@ -1030,7 +1030,7 @@ async function doMagicLogin() {
 }
 
 async function doLogout() {
-  await supabase.auth.signOut();
+  await db.auth.signOut();
   currentUser = null;
   currentProfile = null;
   updateAuthUI();
@@ -1039,7 +1039,7 @@ async function doLogout() {
 }
 
 async function loadSession() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await db.auth.getSession();
   if (session) {
     currentUser = session.user;
     await loadProfile();
@@ -1049,7 +1049,7 @@ async function loadSession() {
 
 async function loadProfile() {
   if (!currentUser) { currentProfile = null; return; }
-  const { data } = await supabase.from('contributors').select('*').eq('user_id', currentUser.id).single();
+  const { data } = await db.from('contributors').select('*').eq('user_id', currentUser.id).single();
   currentProfile = data;
 }
 
@@ -1086,7 +1086,7 @@ function updateAuthUI() {
 }
 
 // Listen for auth state changes
-supabase.auth.onAuthStateChange(async (event, session) => {
+db.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN' && session) {
     currentUser = session.user;
     await loadProfile();
@@ -1124,7 +1124,7 @@ async function loadAllData() {
 }
 
 async function loadStats() {
-  const { data } = await supabase.rpc('get_stats');
+  const { data } = await db.rpc('get_stats');
   if (data) {
     document.getElementById('stat-resources').textContent = (data.resources || 0).toLocaleString();
     document.getElementById('stat-categories').textContent = (data.categories || 0).toLocaleString();
@@ -1133,7 +1133,7 @@ async function loadStats() {
 }
 
 async function loadResources() {
-  const { data, error } = await supabase.from('resources').select('*').order('created_at', { ascending: false });
+  const { data, error } = await db.from('resources').select('*').order('created_at', { ascending: false });
   if (error) { console.error(error); return; }
   allResources = data || [];
   renderResources();
@@ -1219,7 +1219,7 @@ function renderTicker() {
 
 // ── NEWS ──
 async function loadNews() {
-  const { data } = await supabase.from('news').select('*').order('created_at', { ascending: false });
+  const { data } = await db.from('news').select('*').order('created_at', { ascending: false });
   allNews = data || [];
   renderNews();
 }
@@ -1238,7 +1238,7 @@ function renderNews() {
 
 // ── SNIPPETS ──
 async function loadSnippets() {
-  const { data } = await supabase.from('snippets').select('*').order('created_at', { ascending: false });
+  const { data } = await db.from('snippets').select('*').order('created_at', { ascending: false });
   allSnippets = data || [];
   renderSnippets();
   renderSnippetLangs();
@@ -1336,7 +1336,7 @@ async function submitApplication() {
   const email = document.getElementById('app-email').value.trim();
   const description = document.getElementById('app-description').value.trim();
   if (!username || !email) { showToast('Username and email required', 'error'); return; }
-  const { error } = await supabase.from('applications').insert({ username, email, description });
+  const { error } = await db.from('applications').insert({ username, email, description });
   if (error) {
     if (error.code === '23505') { showToast('You already have a pending application', 'error'); }
     else { showToast('Error: ' + error.message, 'error'); }
@@ -1384,7 +1384,7 @@ async function doUpload() {
 
   // Check daily limit
   const today = new Date().toISOString().slice(0, 10);
-  const { count } = await supabase.from('resources').select('*', { count: 'exact', head: true })
+  const { count } = await db.from('resources').select('*', { count: 'exact', head: true })
     .eq('uploader_id', currentUser.id)
     .gte('created_at', today + 'T00:00:00');
 
@@ -1397,14 +1397,14 @@ async function doUpload() {
 
   // Upload file to storage
   const filePath = `${currentUser.id}/${Date.now()}_${selectedFile.name}`;
-  const { error: uploadError } = await supabase.storage.from('resource-files').upload(filePath, selectedFile);
+  const { error: uploadError } = await db.storage.from('resource-files').upload(filePath, selectedFile);
   if (uploadError) { showToast('Upload failed: ' + uploadError.message, 'error'); btn.disabled = false; btn.textContent = 'Upload →'; return; }
 
-  const { data: urlData } = supabase.storage.from('resource-files').getPublicUrl(filePath);
+  const { data: urlData } = db.storage.from('resource-files').getPublicUrl(filePath);
 
   // Insert metadata
   const tags = document.getElementById('up-tags').value.split(',').map(t => t.trim()).filter(Boolean);
-  const { error: insertError } = await supabase.from('resources').insert({
+  const { error: insertError } = await db.from('resources').insert({
     title: document.getElementById('up-title').value.trim(),
     description: document.getElementById('up-description').value.trim(),
     type: document.getElementById('up-type').value,
@@ -1437,7 +1437,7 @@ async function doUpload() {
 
 async function loadMyUploads() {
   if (!currentUser) return;
-  const { data } = await supabase.from('resources').select('*').eq('uploader_id', currentUser.id).order('created_at', { ascending: false });
+  const { data } = await db.from('resources').select('*').eq('uploader_id', currentUser.id).order('created_at', { ascending: false });
   const el = document.getElementById('my-uploads');
   if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">You haven\'t uploaded anything yet.</div>'; return; }
   el.innerHTML = `<table class="resource-table"><thead><tr><th>Title</th><th>Type</th><th>Date</th><th>Action</th></tr></thead><tbody>` +
@@ -1449,9 +1449,9 @@ async function deleteResource(id, fileName) {
   if (!confirm('Delete this resource?')) return;
   // Delete from storage if file exists
   if (fileName && currentUser) {
-    await supabase.storage.from('resource-files').remove([`${currentUser.id}/${fileName}`]);
+    await db.storage.from('resource-files').remove([`${currentUser.id}/${fileName}`]);
   }
-  await supabase.from('resources').delete().eq('id', id);
+  await db.from('resources').delete().eq('id', id);
   showToast('Resource deleted', 'success');
   loadMyUploads();
   loadResources();
@@ -1475,7 +1475,7 @@ async function loadAdminData() {
 }
 
 async function loadPendingApps() {
-  const { data } = await supabase.from('applications').select('*').eq('status', 'pending').order('created_at');
+  const { data } = await db.from('applications').select('*').eq('status', 'pending').order('created_at');
   const el = document.getElementById('pending-apps');
   if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">No pending applications.</div>'; return; }
   el.innerHTML = data.map(a => `
@@ -1495,7 +1495,7 @@ async function loadPendingApps() {
 
 async function approveApp(id, username, email) {
   // Create the user via Supabase auth invite
-  const { error } = await supabase.auth.admin.inviteUserByEmail(email, {
+  const { error } = await db.auth.admin.inviteUserByEmail(email, {
     data: { username: username, role: 'contributor' }
   });
   if (error) { showToast('Invite failed: ' + error.message, 'error'); return; }
@@ -1506,7 +1506,7 @@ async function approveApp(id, username, email) {
   // Actually, let's just mark the application and let the trigger handle it
   // For now, mark approved and the user will be added on their first login
 
-  await supabase.from('applications').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', id);
+  await db.from('applications').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', id);
 
   // Pre-create contributor entry — the user_id will be linked on first login
   // We use a placeholder approach: the user signs up, and we link them
@@ -1517,13 +1517,13 @@ async function approveApp(id, username, email) {
 }
 
 async function rejectApp(id) {
-  await supabase.from('applications').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', id);
+  await db.from('applications').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', id);
   showToast('Application rejected', 'info');
   loadPendingApps();
 }
 
 async function loadAllContributors() {
-  const { data } = await supabase.from('contributors').select('*').order('created_at');
+  const { data } = await db.from('contributors').select('*').order('created_at');
   const el = document.getElementById('all-contributors');
   if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">No contributors.</div>'; return; }
   el.innerHTML = `<table class="resource-table"><thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Joined</th><th>Action</th></tr></thead><tbody>` +
@@ -1538,13 +1538,13 @@ async function loadAllContributors() {
 }
 
 async function toggleContributor(userId, approve) {
-  await supabase.from('contributors').update({ approved: approve }).eq('user_id', userId);
+  await db.from('contributors').update({ approved: approve }).eq('user_id', userId);
   showToast(approve ? 'Contributor reinstated' : 'Contributor suspended', 'success');
   loadAllContributors();
 }
 
 async function loadAllResourcesAdmin() {
-  const { data } = await supabase.from('resources').select('*').order('created_at', { ascending: false });
+  const { data } = await db.from('resources').select('*').order('created_at', { ascending: false });
   const el = document.getElementById('all-resources-admin');
   if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">No resources.</div>'; return; }
   el.innerHTML = `<table class="resource-table"><thead><tr><th>Title</th><th>Type</th><th>Author</th><th>Date</th><th>Action</th></tr></thead><tbody>` +
@@ -1563,9 +1563,9 @@ async function loadAllResourcesAdmin() {
 async function adminDeleteResource(id, fileName) {
   if (!confirm('Delete this resource?')) return;
   if (fileName) {
-    await supabase.storage.from('resource-files').remove([`*/${fileName}`]).catch(() => {});
+    await db.storage.from('resource-files').remove([`*/${fileName}`]).catch(() => {});
   }
-  await supabase.from('resources').delete().eq('id', id);
+  await db.from('resources').delete().eq('id', id);
   showToast('Resource deleted', 'success');
   loadAllResourcesAdmin();
   loadResources();
