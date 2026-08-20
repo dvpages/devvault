@@ -4,7 +4,7 @@
 // ══════════════════════════════════════════════
 
 const SUPABASE_URL = 'https://wrfpfibxiufnunhfuofg.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_u3RQTUMUNU8LiNxYrsGdbw_hs9Al7S8';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyZnBmaWJ4aXVmbnVuaGZ1b2ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNjExMDksImV4cCI6MjEwMjYzNzEwOX0.sAqk91WtVPGjMCMsH2ja56tNHFbzLCzUcdW3FJimgP4';
 
 // Allowed file types for upload
 const ALLOWED_FILE_TYPES = [
