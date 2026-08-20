@@ -1017,7 +1017,7 @@ async function doMagicLogin() {
   const status = document.getElementById('login-status');
   btn.disabled = true;
   btn.textContent = 'Sending…';
-  const { error } = await db.auth.signInWithOtp({ email });
+  const { error } = await db.auth.signInWithOtp({ email, options: { emailRedirectTo: 'https://dvpages.github.io/devvault' } });
   btn.disabled = false;
   btn.textContent = 'Send Magic Link →';
   if (error) {
